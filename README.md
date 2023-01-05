@@ -1,2 +1,2 @@
 # 097222_Project
-Action recognization project on surgical data video
+Action recognition project on surgical video data
