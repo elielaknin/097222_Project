@@ -49,13 +49,17 @@ def main():
     video_counter_df = pd.DataFrame(video_counter_stats_dict, dtype='float')
     video_appearance_df = pd.DataFrame(video_appearance_stats_dict, dtype='float')
 
-    video_counter_df = video_counter_df / video_counter_df.sum(axis=0)
-    video_appearance_df = video_appearance_df / video_appearance_df.sum(axis=0)
+    video_counter_propa_df = video_counter_df / video_counter_df.sum(axis=0)
+    video_appearance_propa_df = video_appearance_df / video_appearance_df.sum(axis=0)
 
     video_counter_df.rename(gesture_label_dict_inv, inplace=True)
     video_counter_df = video_counter_df.T
     video_appearance_df.rename(gesture_label_dict_inv, inplace=True)
     video_appearance_df = video_appearance_df.T
+    video_counter_propa_df.rename(gesture_label_dict_inv, inplace=True)
+    video_counter_propa_df = video_counter_propa_df.T
+    video_appearance_propa_df.rename(gesture_label_dict_inv, inplace=True)
+    video_appearance_propa_df = video_appearance_propa_df.T
 
     pos = [1, 2, 3, 4, 5, 6]
     # labels = ['a', 'b', 'c', 'd', 'e', 'f']
@@ -64,10 +68,18 @@ def main():
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(10, 12))
     ax.violinplot(video_counter_df, pos)
     ax.set_xticklabels(labels)
+    plt.title('Time of each label per video')
+    plt.xticks(np.arange(1, len(labels) + 1), labels)
+    plt.xticks(rotation=30)
+    plt.savefig(os.path.join(result_path, 'counter_delta_time_violin_plot.png'))
+
+    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(10, 12))
+    ax.violinplot(video_counter_propa_df, pos)
+    ax.set_xticklabels(labels)
     plt.title('Propability of time of each label per video')
     plt.xticks(np.arange(1, len(labels) + 1), labels)
     plt.xticks(rotation=30)
-    plt.savefig(os.path.join(result_path, 'counter_delta_time_propa_violin_plot.png'))
+    plt.savefig(os.path.join(result_path, 'propa_counter_delta_time_violin_plot.png'))
 
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(10, 12))
     ax.violinplot(video_appearance_df, pos)
@@ -75,7 +87,15 @@ def main():
     plt.title('Propability of appearance of each label per video')
     plt.xticks(np.arange(1, len(labels) + 1), labels)
     plt.xticks(rotation=30)
-    plt.savefig(os.path.join(result_path, 'number_of_appearance_propa_violin_plot.png'))
+    plt.savefig(os.path.join(result_path, 'number_of_appearance_violin_plot.png'))
+
+    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(10, 12))
+    ax.violinplot(video_appearance_propa_df, pos)
+    ax.set_xticklabels(labels)
+    plt.title('Propability of appearance of each label per video')
+    plt.xticks(np.arange(1, len(labels) + 1), labels)
+    plt.xticks(rotation=30)
+    plt.savefig(os.path.join(result_path, 'propa_number_of_appearance_violin_plot.png'))
 
     print('a')
 
