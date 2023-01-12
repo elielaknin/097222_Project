@@ -36,18 +36,26 @@ class BatchGenerator(object):
         batch_input = []
         batch_target = []
         for vid in batch:
-            features = np.load(self.features_path + vid.split('.')[0] + '.npy')
-            file_ptr = open(self.gt_path + vid, 'r')
+            # print(vid)
+            features = np.load(self.features_path + vid + '.npy')
+            file_ptr = open(self.gt_path + vid + '.txt', 'r')
             content = file_ptr.read().split('\n')[:-1]
-            classes = np.zeros(min(np.shape(features)[1], len(content)))
-            for i in range(len(classes)):
-                classes[i] = self.actions_dict[content[i]]
-            batch_input .append(features[:, ::self.sample_rate])
+            classes_list = []
+            for i in range(len(content)):
+                start = int(content[i].split(' ')[0])
+                end = int(content[i].split(' ')[1])
+                label = self.actions_dict[content[i].split(' ')[2]]
+                if end-start <= 0:
+                    continue
+                classes_list.append(label*np.ones(end-start+1))
+
+            classes = np.concatenate(classes_list, axis=0)
+            batch_input.append(features[:, ::self.sample_rate])
             batch_target.append(classes[::self.sample_rate])
 
         length_of_sequences = list(map(len, batch_target))
         batch_input_tensor = torch.zeros(len(batch_input), np.shape(batch_input[0])[0], max(length_of_sequences), dtype=torch.float)
-        batch_target_tensor = torch.ones(len(batch_input), max(length_of_sequences), dtype=torch.long)*(-100)
+        batch_target_tensor = torch.ones(len(batch_input), max(length_of_sequences), dtype=torch.long)
         mask = torch.zeros(len(batch_input), self.num_classes, max(length_of_sequences), dtype=torch.float)
         for i in range(len(batch_input)):
             batch_input_tensor[i, :, :np.shape(batch_input[i])[1]] = torch.from_numpy(batch_input[i])
