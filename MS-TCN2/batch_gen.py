@@ -36,7 +36,7 @@ class BatchGenerator(object):
         batch_input = []
         batch_target = []
         for vid in batch:
-            # print(vid)
+            # print(f"current video is {vid}")
             features = np.load(self.features_path + vid + '.npy')
             file_ptr = open(self.gt_path + vid + '.txt', 'r')
             content = file_ptr.read().split('\n')[:-1]

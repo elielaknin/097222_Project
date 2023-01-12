@@ -7,6 +7,7 @@ from torch import optim
 import copy
 import numpy as np
 from loguru import logger
+from tqdm import tqdm
 
 
 class MS_TCN2(nn.Module):
@@ -134,16 +135,19 @@ class Trainer:
         logger.add('logs/' + dataset + "_" + split + "_{time}.log")
         logger.add(sys.stdout, colorize=True, format="{message}")
 
-    def train(self, save_dir, batch_gen, num_epochs, batch_size, learning_rate, device):
+    def train(self, save_dir, train_dl, val_dl, num_epochs, batch_size, learning_rate, device):
         self.model.train()
         self.model.to(device)
         optimizer = optim.Adam(self.model.parameters(), lr=learning_rate)
+
         for epoch in range(num_epochs):
-            epoch_loss = 0
-            correct = 0
-            total = 0
-            while batch_gen.has_next():
-                batch_input, batch_target, mask = batch_gen.next_batch(batch_size)
+            epoch_loss_train = 0
+            correct_train = 0
+            total_train = 0
+            # train part
+            self.model.train()
+            while train_dl.has_next():
+                batch_input, batch_target, mask = train_dl.next_batch(batch_size)
                 batch_input, batch_target, mask = batch_input.to(device), batch_target.to(device), mask.to(device)
                 optimizer.zero_grad()
                 predictions = self.model(batch_input)
@@ -153,19 +157,48 @@ class Trainer:
                     loss += self.ce(p.transpose(2, 1).contiguous().view(-1, self.num_classes), batch_target.view(-1))
                     loss += 0.15*torch.mean(torch.clamp(self.mse(F.log_softmax(p[:, :, 1:], dim=1), F.log_softmax(p.detach()[:, :, :-1], dim=1)), min=0, max=16)*mask[:, :, 1:])
 
-                epoch_loss += loss.item()
+                epoch_loss_train += loss.item()
+                # print(loss.item())
                 loss.backward()
                 optimizer.step()
 
                 _, predicted = torch.max(predictions[-1].data, 1)
-                correct += ((predicted == batch_target).float()*mask[:, 0, :].squeeze(1)).sum().item()
-                total += torch.sum(mask[:, 0, :]).item()
+                correct_train += ((predicted == batch_target).float()*mask[:, 0, :].squeeze(1)).sum().item()
+                total_train += torch.sum(mask[:, 0, :]).item()
 
-            batch_gen.reset()
+            train_dl.reset()
             torch.save(self.model.state_dict(), save_dir + "/epoch-" + str(epoch + 1) + ".model")
             torch.save(optimizer.state_dict(), save_dir + "/epoch-" + str(epoch + 1) + ".opt")
-            logger.info("[epoch %d]: epoch loss = %f,   acc = %f" % (epoch + 1, epoch_loss / len(batch_gen.list_of_examples),
-                                                               float(correct)/total))
+            logger.info("Train - [epoch %d]: epoch loss = %f,   acc = %f" % (epoch + 1, epoch_loss_train / len(train_dl.list_of_examples),
+                                                               float(correct_train)/total_train))
+
+            # val part
+            epoch_loss_val = 0
+            correct_val = 0
+            total_val = 0
+            self.model.eval()
+            with torch.no_grad():
+                while val_dl.has_next():
+                    batch_input, batch_target, mask = val_dl.next_batch(batch_size)
+                    batch_input, batch_target, mask = batch_input.to(device), batch_target.to(device), mask.to(device)
+                    predictions = self.model(batch_input)
+
+                    loss = 0
+                    for p in predictions:
+                        loss += self.ce(p.transpose(2, 1).contiguous().view(-1, self.num_classes), batch_target.view(-1))
+                        loss += 0.15*torch.mean(torch.clamp(self.mse(F.log_softmax(p[:, :, 1:], dim=1), F.log_softmax(p.detach()[:, :, :-1], dim=1)), min=0, max=16)*mask[:, :, 1:])
+
+                    epoch_loss_val += loss.item()
+
+                    _, predicted = torch.max(predictions[-1].data, 1)
+                    correct_val += ((predicted == batch_target).float()*mask[:, 0, :].squeeze(1)).sum().item()
+                    total_val += torch.sum(mask[:, 0, :]).item()
+
+            val_dl.reset()
+            logger.info("Validation - [epoch %d]: epoch loss = %f,   acc = %f" % (epoch + 1, epoch_loss_val / len(val_dl.list_of_examples),
+                                                               float(correct_val)/total_val))
+
+
 
     def predict(self, model_dir, results_dir, features_path, vid_list_file, epoch, actions_dict, device, sample_rate):
         self.model.eval()

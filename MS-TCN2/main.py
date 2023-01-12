@@ -76,9 +76,16 @@ num_classes = len(actions_dict)
 for fold in range(5):
     trainer = Trainer(num_layers_PG, num_layers_R, num_R, num_f_maps, features_dim, num_classes, args.dataset, args.split)
     if args.action == "train":
-        batch_gen = BatchGenerator(num_classes, actions_dict, gt_path, features_path, sample_rate)
-        batch_gen.read_data(os.path.join(vid_folds_list_file, f'train{fold}.txt'))
-        trainer.train(model_dir, batch_gen, num_epochs=num_epochs, batch_size=5, learning_rate=lr, device=device)
+        train_dl = BatchGenerator(num_classes, actions_dict, gt_path, features_path, sample_rate)
+        train_dl.read_data(os.path.join(vid_folds_list_file, f'train{fold}.txt'))
+
+        val_dl = BatchGenerator(num_classes, actions_dict, gt_path, features_path, sample_rate)
+        val_dl.read_data(os.path.join(vid_folds_list_file, f'valid{fold}.txt'))
+
+        test_dl = BatchGenerator(num_classes, actions_dict, gt_path, features_path, sample_rate)
+        test_dl.read_data(os.path.join(vid_folds_list_file, f'test{fold}.txt'))
+
+        trainer.train(model_dir, train_dl, val_dl, num_epochs=num_epochs, batch_size=1, learning_rate=lr, device=device)
 
 
 
