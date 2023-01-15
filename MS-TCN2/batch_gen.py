@@ -52,10 +52,12 @@ class BatchGenerator(object):
         batch_target = []
         for vid in batch:
             # print(f"current video is {vid}")
+            print(f"self.run_local is {self.run_local}")
             if self.run_local:
                 features = np.load(self.features_path + vid + '.npy')
             else:
                 feature_path_with_fold = os.path.join(self.features_path, f"fold_{current_fold_number}")
+                print(feature_path_with_fold)
                 features = np.load(feature_path_with_fold + vid + '.npy')
 
             file_ptr = open(self.gt_path + vid + '.txt', 'r')
