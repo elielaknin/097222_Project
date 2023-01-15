@@ -218,6 +218,7 @@ class Trainer:
             while train_dl.has_next():
                 batch_input, batch_target, mask = train_dl.next_batch(batch_size, current_fold_number)
                 batch_input, batch_target, mask = batch_input.to(device), batch_target.to(device), mask.to(device)
+                self.model.to(device)
                 optimizer.zero_grad()
                 predictions = self.model(batch_input)
 
@@ -264,6 +265,7 @@ class Trainer:
             while val_dl.has_next():
                 batch_input, batch_target, mask = val_dl.next_batch(batch_size, current_fold_number)
                 batch_input, batch_target, mask = batch_input.to(device), batch_target.to(device), mask.to(device)
+                self.model.to(device)
                 predictions = self.model(batch_input)
 
                 loss = 0
@@ -321,8 +323,9 @@ class Trainer:
                 batch_input, batch_target, mask = test_dl.next_batch(batch_size, current_fold_number)
                 batch_input, batch_target, mask = batch_input.to(device), batch_target.to(device), mask.to(
                     device)
-                video_name = test_dl.get_video_name()
+                self.model.to(device)
                 predictions = self.model(batch_input)
+                video_name = test_dl.get_video_name()
 
                 loss = 0
                 for p in predictions:
