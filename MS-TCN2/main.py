@@ -20,7 +20,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--action', default='train')
 parser.add_argument('--dataset', default="APAS")
 parser.add_argument('--train_ratio', default='1', type=float)
-parser.add_argument('--run_local', default=True)
+parser.add_argument('--run_local', action='store_true')
 # parser.add_argument('--exp_name', default='test_run')
 parser.add_argument('--model_type', default='baseline') #baseline or advanced
 
