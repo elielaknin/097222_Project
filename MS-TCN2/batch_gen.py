@@ -56,7 +56,7 @@ class BatchGenerator(object):
             if self.run_local:
                 features = np.load(self.features_path + vid + '.npy')
             else:
-                feature_path_with_fold = os.path.join(self.features_path, f"fold_{current_fold_number}")
+                feature_path_with_fold = os.path.join(self.features_path, f"fold_{current_fold_number}/")
                 print(feature_path_with_fold)
                 features = np.load(feature_path_with_fold + vid + '.npy')
 
