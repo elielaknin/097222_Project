@@ -88,6 +88,29 @@ def f_score(recognized, ground_truth, overlap, bg_class=["background"]):
     fn = len(y_label) - sum(hits)
     return float(tp), float(fp), float(fn)
 
+def multiple_f_score(y_pred, y_gt):
+    overlap = [.1, .25, .5]
+    tp, fp, fn = np.zeros(3), np.zeros(3), np.zeros(3)
+
+    for s in range(len(overlap)):
+        tp1, fp1, fn1 = f_score(y_pred, y_gt, overlap[s])
+        tp[s] += tp1
+        fp[s] += fp1
+        fn[s] += fn1
+
+    f1_list = []
+    for s in range(len(overlap)):
+        precision = tp[s] / float(tp[s] + fp[s])
+        recall = tp[s] / float(tp[s] + fn[s])
+
+        f1 = 2.0 * (precision * recall) / (precision + recall)
+
+        f1 = np.nan_to_num(f1) * 100
+        f1_list.append(f1)
+        # print('F1@%0.2f: %.4f' % (overlap[s], f1))
+
+    return tuple(f1_list)
+
 
 def main():
     parser = argparse.ArgumentParser()

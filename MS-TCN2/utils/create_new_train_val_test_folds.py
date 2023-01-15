@@ -6,11 +6,10 @@ import math
 import pandas as pd
 import numpy as np
 
-
 def main():
-    fold_path = '../data/folds'
-    new_fold_path = '../data/new_folds'
-    gt_path = '../data/transcriptions_gestures'
+    fold_path = '../../data/folds'
+    new_fold_path = '../../data/new_folds'
+    gt_path = '../../data/transcriptions_gestures'
 
     os.makedirs(new_fold_path, exist_ok=True)
 

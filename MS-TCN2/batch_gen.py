@@ -2,10 +2,11 @@
 import torch
 import numpy as np
 import random
+import os
 
 
 class BatchGenerator(object):
-    def __init__(self, num_classes, actions_dict, gt_path, features_path, sample_rate):
+    def __init__(self, num_classes, actions_dict, gt_path, features_path, sample_rate, run_local, data_ratio_to_use=1):
         self.list_of_examples = list()
         self.index = 0
         self.num_classes = num_classes
@@ -13,6 +14,12 @@ class BatchGenerator(object):
         self.gt_path = gt_path
         self.features_path = features_path
         self.sample_rate = sample_rate
+        self.run_local = run_local
+        self.data_ratio_to_use = data_ratio_to_use
+
+
+    def get_video_name(self):
+        return self.list_of_examples[self.index-1]
 
     def reset(self):
         self.index = 0
@@ -27,9 +34,17 @@ class BatchGenerator(object):
         file_ptr = open(vid_list_file, 'r')
         self.list_of_examples = file_ptr.read().split('\n')[:-1]
         file_ptr.close()
-        random.shuffle(self.list_of_examples)
 
-    def next_batch(self, batch_size):
+        if self.data_ratio_to_use == 1:
+            random.shuffle(self.list_of_examples)
+        else:
+            number_of_sample_to_use = int(len(self.list_of_examples)*self.data_ratio_to_use)
+            random.shuffle(self.list_of_examples)
+            self.list_of_examples = self.list_of_examples[0:number_of_sample_to_use]
+
+
+
+    def next_batch(self, batch_size, current_fold_number):
         batch = self.list_of_examples[self.index:self.index + batch_size]
         self.index += batch_size
 
@@ -37,7 +52,12 @@ class BatchGenerator(object):
         batch_target = []
         for vid in batch:
             # print(f"current video is {vid}")
-            features = np.load(self.features_path + vid + '.npy')
+            if self.run_local:
+                features = np.load(self.features_path + vid + '.npy')
+            else:
+                feature_path_with_fold = os.path.join(self.features_path, current_fold_number)
+                features = np.load(feature_path_with_fold + vid + '.npy')
+
             file_ptr = open(self.gt_path + vid + '.txt', 'r')
             content = file_ptr.read().split('\n')[:-1]
             classes_list = []
