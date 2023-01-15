@@ -10,6 +10,7 @@ import wandb
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Cuda is {torch.cuda.is_available()}")
 seed = 1538574472
 random.seed(seed)
 torch.manual_seed(seed)
