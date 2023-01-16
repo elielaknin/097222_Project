@@ -63,9 +63,12 @@ if args.run_local == True:
     gt_path = "../data/transcriptions_gestures/"
     mapping_file = "../data/mapping_gestures.txt"
 else:
-    features_path = "/datashare/APAS/features/"
-    gt_path = "/datashare/APAS/transcriptions_gestures/"
-    mapping_file = "/datashare/APAS/mapping_gestures.txt"
+    features_path = "../data/features/"
+    gt_path = "../data/transcriptions_gestures/"
+    mapping_file = "../data/mapping_gestures.txt"
+    # features_path = "/datashare/APAS/features/"
+    # gt_path = "/datashare/APAS/transcriptions_gestures/"
+    # mapping_file = "/datashare/APAS/mapping_gestures.txt"
 
 exp_name = f"{args.model_type}_model_train_ratio_{args.train_ratio}"
 model_dir = f"../exp/{exp_name}/"
@@ -84,8 +87,6 @@ for a in actions:
     actions_dict[a.split()[1]] = int(a.split()[0])
 
 num_classes = len(actions_dict)
-
-# num_layers_PG = [5, 11]
 
 hp_dict = {
     "num_layers_PG": num_layers_PG,
