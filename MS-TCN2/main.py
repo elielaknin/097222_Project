@@ -132,6 +132,10 @@ for fold in range(5):
 
             exp_model_dir_fold = os.path.join(model_dir_fold, f"exp_{exp_idx}")
             os.makedirs(exp_model_dir_fold, exist_ok=True)
+            # check if csv summary file already exist:
+            if os.path.exists(os.path.join(exp_model_dir_fold, 'run_summary.csv')):
+                print("Configuration was already done, continue to next..")
+                continue
 
             trainer = Trainer(args.model_type, hp, features_dim, num_classes, args.dataset, exp_model_dir_fold)
 
