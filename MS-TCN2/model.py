@@ -1,7 +1,6 @@
 import json
 import os.path
 import sys
-
 import pandas as pd
 import torch
 import torch.nn as nn
@@ -13,8 +12,6 @@ from loguru import logger
 import eval
 from tqdm import tqdm
 import wandb
-import itertools
-
 
 class MS_TCN2(nn.Module):
     def __init__(self, num_layers_PG, num_layers_R, num_R, num_f_maps, dim, num_classes):
@@ -145,7 +142,7 @@ class Trainer:
 
 
     def full_train(self, save_dir, train_dl, val_dl, test_dl, fold_number, hp, num_epochs, device,
-                   exp_name, exp_idx):
+                   exp_name, exp_idx, active_wandb):
 
         #save HP dict
         with open(os.path.join(save_dir, "HP.json"), "w") as write_file:
@@ -155,10 +152,8 @@ class Trainer:
         self.model.to(device)
 
         exp_hp_number = f"exp_{exp_idx}"
-        wandb.init(project=f"{exp_name}_fold_{fold_number}", name=exp_hp_number, config=hp)
-
-        # wandb.run.name = exp_hp_number
-        # wandb.config.update(hp)
+        if active_wandb:
+            wandb.init(project=f"{exp_name}_fold_{fold_number}", name=exp_hp_number, config=hp)
 
         min_val_loss = np.inf
         max_val_acc, max_val_edit, max_val_f1at10, max_val_f1at25, max_val_f1at50 = 0, 0, 0, 0, 0
@@ -176,7 +171,8 @@ class Trainer:
             loss_val, acc_val, edit_score_val, f10_val, f25_val, f50_val = self.val(device, val_dl, epoch, fold_number)
 
             epochs_results_list.append((epoch, loss_train, acc_train, loss_val, acc_val, edit_score_val, f10_val, f25_val, f50_val))
-            wandb.log({"loss_train": loss_train, "acc_train": acc_train, "loss_val": loss_val, "acc_val": acc_val,
+            if active_wandb:
+                wandb.log({"loss_train": loss_train, "acc_train": acc_train, "loss_val": loss_val, "acc_val": acc_val,
                        "edit_score_val": edit_score_val, "f10_val": f10_val, "f25_val": f25_val, "f50_val": f50_val})
 
             # Save best validation model
@@ -190,7 +186,8 @@ class Trainer:
                 torch.save(self.model.state_dict(), os.path.join(save_dir, f"{save_model_name}.pth"))
                 # print('Save new best model')
 
-        wandb.finish(quiet=True)
+        if active_wandb:
+            wandb.finish(quiet=True)
         pd.DataFrame(epochs_results_list, columns=['epochs', 'loss_train', 'acc_train', 'loss_val', 'acc_val',
                                                    'edit_score_val','f10_val', 'f25_val', 'f50_val']).to_csv(
             os.path.join(save_dir, 'run_summary.csv'), index=False)
