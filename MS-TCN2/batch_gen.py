@@ -6,7 +6,8 @@ import os
 
 
 class BatchGenerator(object):
-    def __init__(self, num_classes, actions_dict, gt_path, features_path, sample_rate, run_local, data_ratio_to_use=1):
+    def __init__(self, num_classes, actions_dict, gt_path, features_path, sample_rate, run_local, tool_usage_features,
+                 model_type='baseline', data_ratio_to_use=1):
         self.list_of_examples = list()
         self.index = 0
         self.num_classes = num_classes
@@ -15,6 +16,8 @@ class BatchGenerator(object):
         self.features_path = features_path
         self.sample_rate = sample_rate
         self.run_local = run_local
+        self.tool_usage_features = tool_usage_features
+        self.model_type = model_type
         self.data_ratio_to_use = data_ratio_to_use
 
 
@@ -57,6 +60,13 @@ class BatchGenerator(object):
             else:
                 feature_path_with_fold = os.path.join(self.features_path, f"fold{current_fold_number}/")
                 features = np.load(feature_path_with_fold + vid + '.npy')
+
+            if self.model_type == 'advanced':
+                tool_features = np.load(self.tool_usage_features + vid + '.npy')
+                # resize to number of frames from features array
+                tool_features = tool_features[:, 0:features.shape[1]]
+                features = np.concatenate([features, tool_features])
+
 
             file_ptr = open(self.gt_path + vid + '.txt', 'r')
             content = file_ptr.read().split('\n')[:-1]

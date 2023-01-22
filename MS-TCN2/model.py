@@ -130,10 +130,10 @@ class DilatedResidualLayer(nn.Module):
 
 class Trainer:
     def __init__(self, model_type, hp, dim, num_classes, dataset, output_folder):
-        if model_type == 'baseline':
-            self.model = MS_TCN2(hp['num_layers_PG'], hp['num_layers_R'], hp['num_R'], hp['num_f_maps'], dim, num_classes)
-            self.ce = nn.CrossEntropyLoss(ignore_index=-100)
-            self.mse = nn.MSELoss(reduction='none')
+
+        self.model = MS_TCN2(hp['num_layers_PG'], hp['num_layers_R'], hp['num_R'], hp['num_f_maps'], dim, num_classes)
+        self.ce = nn.CrossEntropyLoss(ignore_index=-100)
+        self.mse = nn.MSELoss(reduction='none')
         self.num_classes = num_classes
         self.output_folder = output_folder
 

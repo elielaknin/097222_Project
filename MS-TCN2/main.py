@@ -23,7 +23,7 @@ parser.add_argument('--dataset', default="APAS")
 parser.add_argument('--train_ratio', default='1', type=float)
 parser.add_argument('--run_local', action='store_true')
 # parser.add_argument('--exp_name', default='test_run')
-parser.add_argument('--model_type', default='baseline')
+parser.add_argument('--model_type', default='baseline') #baseline or advanced
 parser.add_argument('--active_wandb', action='store_true')
 
 parser.add_argument('--features_dim', default='1280', type=int)
@@ -59,17 +59,11 @@ if args.dataset == "50salads":
 
 vid_folds_list_file = "../data/new_filter_folds"
 
-if args.run_local == True:
-    features_path = "../data/features/"
-    gt_path = "../data/transcriptions_gestures/"
-    mapping_file = "../data/mapping_gestures.txt"
-else:
-    features_path = "../data/features/"
-    gt_path = "../data/transcriptions_gestures/"
-    mapping_file = "../data/mapping_gestures.txt"
-    # features_path = "/datashare/APAS/features/"
-    # gt_path = "/datashare/APAS/transcriptions_gestures/"
-    # mapping_file = "/datashare/APAS/mapping_gestures.txt"
+features_path = "../data/features/"
+gt_path = "../data/transcriptions_gestures/"
+mapping_file = "../data/mapping_gestures.txt"
+tool_usage_features = "../data/new_tool_usage_features/"
+
 
 exp_name = f"{args.model_type}_model_train_ratio_{args.train_ratio}"
 model_dir = f"../exp/{exp_name}/"
@@ -98,6 +92,9 @@ hp_dict = {
     "learning_rate": lr
 }
 
+if args.model_type == 'advanced':
+    features_dim = features_dim + 40
+
 for fold in range(5):
     if args.action == "train":
 
@@ -112,13 +109,15 @@ for fold in range(5):
 
         #dataloader creation
         train_dl = BatchGenerator(num_classes, actions_dict, gt_path, features_path, sample_rate, args.run_local,
-                                  args.train_ratio)
+                                  tool_usage_features, args.model_type, args.train_ratio)
         train_dl.read_data(os.path.join(vid_folds_list_file, f'train{fold}.txt'))
 
-        val_dl = BatchGenerator(num_classes, actions_dict, gt_path, features_path, sample_rate, args.run_local)
+        val_dl = BatchGenerator(num_classes, actions_dict, gt_path, features_path, sample_rate, args.run_local,
+                                tool_usage_features, args.model_type)
         val_dl.read_data(os.path.join(vid_folds_list_file, f'valid{fold}.txt'))
 
-        test_dl = BatchGenerator(num_classes, actions_dict, gt_path, features_path, sample_rate, args.run_local)
+        test_dl = BatchGenerator(num_classes, actions_dict, gt_path, features_path, sample_rate, args.run_local,
+                                 tool_usage_features, args.model_type)
         test_dl.read_data(os.path.join(vid_folds_list_file, f'test{fold}.txt'))
 
         total_videos_number = len(train_dl.list_of_examples) + len(val_dl.list_of_examples) + len(
