@@ -23,7 +23,8 @@ parser.add_argument('--dataset', default="APAS")
 parser.add_argument('--train_ratio', default='1', type=float)
 parser.add_argument('--run_local', action='store_true')
 # parser.add_argument('--exp_name', default='test_run')
-parser.add_argument('--model_type', default='baseline') #baseline or advanced
+parser.add_argument('--model_type', default='baseline')
+parser.add_argument('--active_wandb', action='store_true')
 
 parser.add_argument('--features_dim', default='1280', type=int)
 parser.add_argument('--bz', default='1', type=int, nargs="+")
@@ -141,7 +142,7 @@ for fold in range(5):
             trainer = Trainer(args.model_type, hp, features_dim, num_classes, args.dataset, exp_model_dir_fold)
 
             results_tuple = trainer.full_train(exp_model_dir_fold, train_dl, val_dl, test_dl, fold, hp, num_epochs,
-                                            device, exp_name, exp_idx)
+                                               device, exp_name, exp_idx, args.active_wandb)
             results_list.append(results_tuple)
 
         results_df = pd.DataFrame(results_list, columns=['exp_name', 'best_epoch', 'val_loss', 'val_acc', 'val_edit',
