@@ -13,7 +13,7 @@ from tqdm import tqdm
 parser = argparse.ArgumentParser()
 parser.add_argument('--results_folder_path', default='exp')
 parser.add_argument('--model_type', default='baseline')
-parser.add_argument('--train_ratio', type=int, nargs="+")
+parser.add_argument('--train_ratio', type=float, nargs="+")
 args = parser.parse_args()
 
 def main():
