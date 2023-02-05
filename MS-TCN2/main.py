@@ -6,7 +6,6 @@ import os
 import argparse
 import random
 import itertools
-import wandb
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
