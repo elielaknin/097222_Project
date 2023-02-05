@@ -12,8 +12,8 @@ import numpy as np
 
 def main():
     result_path = '../results/GT_label_data_stats'
-    gt_path = '../data/transcriptions_gestures'
-    gt_definition = '../data/gestures_definitions.json'
+    gt_path = '../../data/transcriptions_gestures'
+    gt_definition = '../../data/gestures_definitions.json'
 
     f = open(gt_definition)
     gesture_label_dict = json.load(f)['gesture']
