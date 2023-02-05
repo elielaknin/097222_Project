@@ -11,14 +11,18 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--video_name', type=str, help='video name to analyze')
+parser.add_argument('--video_path', type=str, help='video frames path to analyze')
+parser.add_argument('--csv_path', type=str, help='csv of gt and predicted data')
+parser.add_argument('--output_path', type=str, help='folder to save the results')
+parser.add_argument('--json_path', type=str, help='json dict of the gesture definitions')
 args = parser.parse_args()
 
 def main():
     video_name = args.video_name
-    video_path = f'data/videos/{video_name}_top'
-    csv_path = f'data/videos/{video_name}_predictions.csv'
-    output_path = f'data/videos/{video_name}_top_video'
-    json_path = f'data/gestures_definitions.json'
+    video_path = args.video_path
+    csv_path = args.csv_path
+    output_path = args.output_path
+    json_path = args.json_path
 
     os.makedirs(output_path, exist_ok=True)
     video_label_df = pd.read_csv(csv_path, index_col='frame')
