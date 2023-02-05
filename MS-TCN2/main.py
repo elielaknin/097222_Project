@@ -7,7 +7,6 @@ import argparse
 import random
 import itertools
 
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Cuda is {torch.cuda.is_available()}")
 seed = 1538574472
@@ -21,7 +20,6 @@ parser.add_argument('--action', default='train')
 parser.add_argument('--dataset', default="APAS")
 parser.add_argument('--train_ratio', default='1', type=float)
 parser.add_argument('--run_local', action='store_true')
-# parser.add_argument('--exp_name', default='test_run')
 parser.add_argument('--model_type', default='baseline') #baseline or advanced
 parser.add_argument('--active_wandb', action='store_true')
 
@@ -49,12 +47,7 @@ num_layers_R = args.num_layers_R
 num_R = args.num_R
 num_f_maps = args.num_f_maps
 
-# use the full temporal resolution @ 15fps
 sample_rate = 1
-# sample input features @ 15fps instead of 30 fps
-# for 50salads, and up-sample the output to 30 fps
-if args.dataset == "50salads":
-    sample_rate = 2
 
 vid_folds_list_file = "../data/new_filter_folds"
 
@@ -147,39 +140,3 @@ for fold in range(5):
                                                          'val_f1@25', 'val_f1@50', 'val_f1@10', 'test_loss', 'test_acc',
                                                          'test_edit', 'test_f1@25', 'test_f1@50', 'test_f1@10'])
         results_df.to_csv(os.path.join(model_dir_fold, 'summary_results.csv'))
-
-
-# if args.action == "predict":
-#     trainer.predict(model_dir, results_dir, features_path, vid_folds_list_file, num_epochs, actions_dict, device, sample_rate)
-
-
-'''
-Alive test working  train acc of 0.372
-
-TODO:
-Phase 1:
-- Fix loss train (nan) - DONE!
-- Support of cross validation - DONE!
-- New dataloader from train and val
-- val loss and acc - DONE!
-- prediction of test set - DONE!
-- Implementation of B&W
-- Add relevant metrics (accuracy, Edit distance, f1@k)
-- Check framerate is correct
-- Refactor code (like NLP course)
-- save predict and GT labels of the test video (for video reconstruction)
-
-Phase 2:
-- add module of Hw1
-- Add FC layers using output of mstcn and hw1 prediction
-- Support of factor of training dataset
-
-Optional:
-- use feature extraction of pre-trained Resnet50
-
-
-EXP
-- train ratio data + Fold (project_name)
-    -Hyper parameters (exp_name)
-    
-'''
