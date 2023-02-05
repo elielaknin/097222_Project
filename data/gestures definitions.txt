@@ -1,0 +1,17 @@
+gestures = {
+"no gesture" : "G0",
+"needle passing" : "G1",
+"pull the suture": "G2",
+"Instrument tie: "G3",
+"Lay the knot" : "G4",
+"Cut the suture" :"G5"
+}
+
+tool_usage ={
+"no tool in hand" : "T0",
+ "needle_driver": "T1",
+ "forceps": "T2",
+ "scissors":"T3"
+}
+
+
